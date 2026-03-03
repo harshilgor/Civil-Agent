@@ -180,6 +180,20 @@
       animation: fadeUp 0.6s 0.4s ease both;
     }
 
+    .hero-backed {
+      margin-top: 36px;
+      padding: 10px 20px;
+      border: 1px solid var(--border-md);
+      border-radius: 8px;
+      background: var(--s1);
+      font-size: 13px;
+      color: var(--g200);
+      font-weight: 400;
+      animation: fadeUp 0.6s 0.5s ease both;
+    }
+
+    .hero-backed strong { color: var(--white); font-weight: 600; }
+
     .btn-primary {
       background: var(--orange); color: var(--white);
       border: none; padding: 13px 28px; border-radius: 8px;
@@ -614,6 +628,10 @@
     <a href="#access" class="btn-primary">Request Early Access</a>
     <a href="#io" class="btn-outline">See input & output →</a>
   </div>
+
+  <div class="hero-backed reveal">
+    Backed by <strong>UC Davis</strong> — $10,000+ in funding
+  </div>
 </section>
 
 <div class="divider"></div>
@@ -827,6 +845,33 @@
 
 <div class="divider"></div>
 
+<!-- ── VISION ── -->
+<section class="section" id="vision">
+  <div class="inner">
+    <div class="reveal">
+      <div class="label">Vision</div>
+      <h2>Multiple agents for<br />the structural engineer’s day.</h2>
+    </div>
+
+    <div class="vision-grid reveal">
+      <div class="vision-card">
+        <h3>Start with load takeoff</h3>
+        <p>Civil Agent begins with the part of structural engineering that is the most repetitive and documentation-heavy: building load takeoff. We want every floor load, every combination, and every code citation to be generated automatically — and still fully auditable.</p>
+      </div>
+      <div class="vision-card">
+        <h3>Then structural layout agents</h3>
+        <p>Next, we are building agents that help you sketch and iterate structural layouts. Think of fast options for framing, column grids, and core walls that respect architecture, codes, and constructability — while you stay in control of the decisions.</p>
+      </div>
+      <div class="vision-card">
+        <h3>All the way to FEM-ready models</h3>
+        <p>Ultimately, Civil Agent should take you from architect’s model to FEM-ready models: consistent load cases, combinations, and geometry exported straight into your analysis tools, with full traceability from first sketch to final design.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
 <!-- ── QUOTE ── -->
 <section class="quote-section">
   <div class="quote-box reveal">
@@ -849,11 +894,11 @@
     <div class="label reveal" style="justify-content:center;">Early Access</div>
     <h2 class="reveal">Try it on your<br />next <em>real project.</em></h2>
     <p class="reveal">We are onboarding a small group of structural engineers for private beta. No commitment. Just bring a real project and we will run it together.</p>
-    <div class="email-form reveal">
-      <input class="email-in" type="email" placeholder="you@firm.com" />
-      <a href="#" class="btn-primary">Join Waitlist</a>
-    </div>
-    <div class="cta-note reveal">No pitch decks. We will reach out personally.</div>
+    <form class="email-form reveal" id="early-access-form">
+      <input class="email-in" type="email" name="email" placeholder="you@firm.com" required />
+      <button type="submit" class="btn-primary" id="early-access-button">Join Waitlist</button>
+    </form>
+    <div class="cta-note reveal" id="early-access-note">No pitch decks. We will reach out personally.</div>
   </div>
 </section>
 
@@ -879,6 +924,58 @@
   }, { threshold: 0.08 });
 
   document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  // Early access form submission
+  const earlyForm = document.getElementById('early-access-form');
+  if (earlyForm) {
+    earlyForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const emailInput = earlyForm.querySelector('input[type="email"]');
+      const button = document.getElementById('early-access-button');
+      const note = document.getElementById('early-access-note');
+
+      if (!emailInput || !button) return;
+
+      const email = emailInput.value.trim();
+      if (!email) return;
+
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = 'Submitting...';
+
+      try {
+        const res = await fetch('/api/early-access', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+
+        if (!res.ok) throw new Error('Request failed');
+
+        emailInput.value = '';
+        button.textContent = 'You’re on the list';
+
+        if (note) {
+          note.textContent = 'Thanks for joining the waitlist. We’ll reach out personally.';
+        }
+      } catch (err) {
+        console.error(err);
+        button.textContent = 'Try again';
+        if (note) {
+          note.textContent = 'Something went wrong. Please try again in a moment.';
+        }
+      } finally {
+        setTimeout(() => {
+          button.disabled = false;
+          button.textContent = originalText;
+          if (note) {
+            note.textContent = 'No pitch decks. We will reach out personally.';
+          }
+        }, 4000);
+      }
+    });
+  }
 </script>
 </body>
 </html>
