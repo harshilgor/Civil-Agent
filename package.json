@@ -7,7 +7,7 @@
     "start": "python -m http.server 8000"
   },
   "dependencies": {
-    "@vercel/blob": "^0.23.0"
+    "@vercel/blob": "^2.3.0"
   }
 }
 

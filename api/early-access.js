@@ -15,20 +15,25 @@ export default async function handler(req, res) {
 
     const normalized = email.trim().toLowerCase();
     const timestamp = new Date().toISOString();
-    const line = `${timestamp},${normalized}\n`;
+    const safeEmail = normalized.replace(/[^a-z0-9]+/gi, '_').slice(0, 120);
+    const pathname = `early-access/${timestamp}-${safeEmail}.json`;
+    const body = JSON.stringify({ email: normalized, submittedAt: timestamp }) + '\n';
 
-    await put('early-access.csv', line, {
+    const blob = await put(pathname, body, {
+      // Your Blob store is configured as private, so the access must be 'private'.
       access: 'private',
-      addRandomSuffix: false,
-      contentType: 'text/csv',
-      append: true,
+      addRandomSuffix: true,
+      contentType: 'application/json',
       token: process.env.BLOB_READ_WRITE_TOKEN,
     });
 
-    return res.status(200).json({ ok: true });
+    return res.status(200).json({ ok: true, pathname: blob.pathname });
   } catch (error) {
     console.error('early-access error', error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({
+      error: 'Internal Server Error',
+      details: error instanceof Error ? error.message : String(error),
+    });
   }
 }
 
