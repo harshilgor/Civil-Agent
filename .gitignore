@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+pytest-cache-files-*/
+
+data/uploads/
+data/corrections/
+data/test_batch_output*/
+data/streamlit_stdout.log
+data/streamlit_stderr.log
+
+.streamlit/secrets.toml
